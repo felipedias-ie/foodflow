@@ -1,3 +1,5 @@
+import Link from "next/link";
+
 export default function Home() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center p-8">
@@ -28,12 +30,12 @@ export default function Home() {
           </div>
 
           <div className="mt-8 flex gap-4">
-            <a 
+            <Link 
               href="/about"
               className="px-6 py-3 bg-indigo-600 text-white rounded-lg font-medium hover:bg-indigo-700 transition-colors"
             >
               About Page
-            </a>
+            </Link>
             <a 
               href="https://github.com"
               target="_blank"
