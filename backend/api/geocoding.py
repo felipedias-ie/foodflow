@@ -43,7 +43,7 @@ def coords_to_address(latitude: float, longitude: float) -> Optional[Location]:
         return None
 
 
-def address_to_coords(query: str) -> Optional[List[Location]]:
+def address_to_coords(query: str) -> Optional[list[Location]]:
     url = "https://nominatim.openstreetmap.org/search"
     
     params = {
