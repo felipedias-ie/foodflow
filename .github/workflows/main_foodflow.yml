@@ -37,14 +37,14 @@ jobs:
       - name: Azure login (OIDC)
         uses: azure/login@v2
         with:
-          client-id: ${{ secrets.AZUREAPPSERVICE_CLIENTID_63EA2FE34C7349F8AF853655DD80D9B4 }}
-          tenant-id: ${{ secrets.AZUREAPPSERVICE_TENANTID_38E2B52AA22B4DC1AF27726A58B247A9 }}
-          subscription-id: ${{ secrets.AZUREAPPSERVICE_SUBSCRIPTIONID_F7622CEEC97341A2A19BABB6960DE87A }}
+          client-id: ${{ secrets.AZUREAPPSERVICE_CLIENTID_C0F5A8EABBF3457A95CDE310E306C9F9 }}
+          tenant-id: ${{ secrets.AZUREAPPSERVICE_TENANTID_1B55B5E753CE4498909F527D4944F877 }}
+          subscription-id: ${{ secrets.AZUREAPPSERVICE_SUBSCRIPTIONID_85DABA06E4384FE99152FF1AB3653231 }}
 
       - name: Deploy to Azure Functions
         uses: Azure/functions-action@v1
         with:
-          app-name: 'foodflow'
+          app-name: 'foodflow-v2'
           slot-name: 'Production'
           package: ${{ env.AZURE_FUNCTIONAPP_PACKAGE_PATH }}
           respect-funcignore: true
