@@ -2,7 +2,7 @@
 const nextConfig = {
   output: 'export',
   images: { unoptimized: true },
-  basePath: '/foodflow-git',
+  basePath: process.env.NODE_ENV === 'production' ? '/foodflow' : '',
 };
 
 module.exports = nextConfig;
