@@ -3,6 +3,9 @@ name: Deploy Python Azure Function - foodflow
 on:
   push:
     branches: [ main ]
+    paths:
+      - 'backend/**'
+      - '.github/workflows/main_foodflow.yml'
   workflow_dispatch:
 
 env:
