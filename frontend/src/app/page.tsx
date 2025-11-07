@@ -1,15 +1,13 @@
-import Image from "next/image";
+import { getAssetPath } from "@/lib/utils";
 
 export default function Home() {
   return (
     <div className="bg-white relative w-full h-screen overflow-hidden">
       <div className="absolute inset-0 w-full h-full">
-        <Image
+        <img
           alt="Hero background"
           className="absolute inset-0 w-full h-full object-cover"
-          src="/hero-bg.png"
-          fill
-          priority
+          src={getAssetPath("/hero-bg.png")}
         />
       </div>
 
@@ -29,13 +27,12 @@ export default function Home() {
           </h1>
 
           <div className="bg-white rounded-full flex items-center pl-4 pr-2 py-2.5 gap-3 max-w-[724px]">
-            <div className="flex items-center justify-center w-5 h-5 shrink-0 relative">
-              <Image
+            <div className="flex items-center justify-center w-5 h-5 shrink-0">
+              <img
                 alt="Location"
-                className="rotate-[39deg]"
-                src="/location-pin.svg"
-                width={16}
-                height={16}
+                className="w-4 h-4"
+                style={{ transform: 'rotate(39deg)' }}
+                src={getAssetPath("/location-pin.svg")}
               />
             </div>
             <input
@@ -44,12 +41,10 @@ export default function Home() {
               className="flex-1 min-w-0 text-[#5e5e5e] text-[15px] outline-none bg-transparent font-medium placeholder:font-medium"
             />
             <button className="bg-black text-white pl-3 pr-4 py-2 rounded-full flex items-center gap-2.5 hover:bg-gray-800 transition-colors shrink-0">
-              <Image
+              <img
                 alt="Search"
-                className="relative"
-                src="/search-icon.svg"
-                width={14}
-                height={14}
+                className="w-3.5 h-3.5"
+                src={getAssetPath("/search-icon.svg")}
               />
               <span className="text-[15px] font-normal whitespace-nowrap">Find Food</span>
             </button>
