@@ -1,11 +1,15 @@
+import Image from "next/image";
+
 export default function Home() {
   return (
     <div className="bg-white relative w-full h-screen overflow-hidden">
       <div className="absolute inset-0 w-full h-full">
-        <img
+        <Image
           alt="Hero background"
           className="absolute inset-0 w-full h-full object-cover"
           src="/hero-bg.png"
+          fill
+          priority
         />
       </div>
 
@@ -25,11 +29,13 @@ export default function Home() {
           </h1>
 
           <div className="bg-white rounded-full flex items-center pl-4 pr-2 py-2.5 gap-3 max-w-[724px]">
-            <div className="flex items-center justify-center w-5 h-5 shrink-0">
-              <img
+            <div className="flex items-center justify-center w-5 h-5 shrink-0 relative">
+              <Image
                 alt="Location"
-                className="w-4 h-4 rotate-[39deg]"
+                className="rotate-[39deg]"
                 src="/location-pin.svg"
+                width={16}
+                height={16}
               />
             </div>
             <input
@@ -38,10 +44,12 @@ export default function Home() {
               className="flex-1 min-w-0 text-[#5e5e5e] text-[15px] outline-none bg-transparent font-medium placeholder:font-medium"
             />
             <button className="bg-black text-white pl-3 pr-4 py-2 rounded-full flex items-center gap-2.5 hover:bg-gray-800 transition-colors shrink-0">
-              <img
+              <Image
                 alt="Search"
-                className="w-3.5 h-3.5"
+                className="relative"
                 src="/search-icon.svg"
+                width={14}
+                height={14}
               />
               <span className="text-[15px] font-normal whitespace-nowrap">Find Food</span>
             </button>
