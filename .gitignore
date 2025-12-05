@@ -22,3 +22,6 @@ test/
 test/**
 
 .cursor/
+
+design/
+brief.md
