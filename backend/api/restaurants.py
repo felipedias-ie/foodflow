@@ -17,6 +17,23 @@ TABLE_CUISINE_INDEX = "CuisineIndex"
 BLOB_CONTAINER_MENUS = "menus"
 BLOB_CONTAINER_IMAGES = "images"
 
+CUISINE_MAP = {
+    "burgers": "hamburguesas",
+    "chinese": "china",
+    "mexican": "mexicana",
+    "indian": "india",
+    "thai": "tailandesa",
+    "pizza": "pizza",
+    "sushi": "sushi",
+    "japanese": "japonesa",
+    "italian": "italiana",
+    "american": "americana",
+    "spanish": "espanola",
+    "kebab": "kebab",
+    "poke": "poke",
+    "chicken": "pollo",
+}
+
 
 def get_blob_base_url() -> str:
     conn_str = get_connection_string()
@@ -96,32 +113,48 @@ def query_nearby(user_lat: float, user_lon: float, limit: int = 20, precision: i
 
 
 def query_by_cuisine(cuisine: str, user_lat: Optional[float] = None, user_lon: Optional[float] = None, limit: int = 20) -> List[dict]:
-    client = get_table_client(TABLE_CUISINE_INDEX)
+    cuisine_key = CUISINE_MAP.get(cuisine.lower(), cuisine.lower())
+    
+    cuisine_client = get_table_client(TABLE_CUISINE_INDEX)
+    rest_client = get_table_client(TABLE_RESTAURANTS)
     results = []
     
     try:
-        entities = client.query_entities(f"PartitionKey eq '{cuisine.lower()}'")
-        for ent in entities:
-            lat = ent.get("lat")
-            lon = ent.get("lon")
-            dist = None
-            eta = None
-            if user_lat is not None and user_lon is not None and lat and lon:
-                dist = haversine_distance_meters((user_lat, user_lon), (lat, lon))
-                eta_low, eta_high = estimate_eta_minutes(dist)
-                eta = [eta_low, eta_high]
-            rest_id = ent.get("RowKey")
-            results.append({
-                "id": rest_id,
-                "name": ent.get("name"),
-                "lat": lat,
-                "lon": lon,
-                "distance_m": round(dist) if dist else None,
-                "eta_minutes": eta,
-                "rating_star": ent.get("rating_star"),
-                "logo_url": get_logo_url(rest_id),
-                "banner_url": get_banner_url(rest_id),
-            })
+        entities = cuisine_client.query_entities(f"PartitionKey eq '{cuisine_key}'")
+        restaurant_ids = [ent.get("RowKey") for ent in entities]
+        
+        for rest_id in restaurant_ids:
+            try:
+                rest_entities = list(rest_client.query_entities(f"RowKey eq '{rest_id}'"))
+                if not rest_entities:
+                    continue
+                ent = rest_entities[0]
+                lat = ent.get("lat")
+                lon = ent.get("lon")
+                dist = None
+                eta = None
+                if user_lat is not None and user_lon is not None and lat and lon:
+                    dist = haversine_distance_meters((user_lat, user_lon), (lat, lon))
+                    eta_low, eta_high = estimate_eta_minutes(dist)
+                    eta = [eta_low, eta_high]
+                results.append({
+                    "id": rest_id,
+                    "name": ent.get("name"),
+                    "unique_name": ent.get("unique_name"),
+                    "address": ent.get("address_first_line"),
+                    "lat": lat,
+                    "lon": lon,
+                    "distance_m": round(dist) if dist else None,
+                    "eta_minutes": eta,
+                    "rating_star": ent.get("rating_star"),
+                    "rating_count": ent.get("rating_count"),
+                    "is_delivery": ent.get("is_delivery"),
+                    "logo_url": get_logo_url(rest_id),
+                    "banner_url": get_banner_url(rest_id),
+                    "cuisines": ent.get("cuisines"),
+                })
+            except Exception:
+                continue
     except Exception:
         pass
     
