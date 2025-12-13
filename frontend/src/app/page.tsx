@@ -2,6 +2,7 @@
 
 import { getAssetPath } from "@/lib/utils";
 import { useState, useEffect, useRef } from "react";
+import { useRouter } from "next/navigation";
 
 interface Suggestion {
   title: string;
@@ -18,16 +19,17 @@ interface SelectedLocation {
 }
 
 export default function Home() {
+  const router = useRouter();
   const [address, setAddress] = useState("");
   const [suggestions, setSuggestions] = useState<Suggestion[]>([]);
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [selectedLocation, setSelectedLocation] = useState<SelectedLocation | null>(null);
   const [isLoadingLocation, setIsLoadingLocation] = useState(false);
-  const debounceTimer = useRef<NodeJS.Timeout>();
+  const debounceTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
-  const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:7072/api';
+  const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:7071/api';
 
   useEffect(() => {
     requestUserLocation();
@@ -71,6 +73,11 @@ export default function Home() {
               latitude: data.data.latitude,
               longitude: data.data.longitude,
             });
+            localStorage.setItem('userLocation', JSON.stringify({
+              lat: data.data.latitude,
+              lon: data.data.longitude,
+              address: formattedAddress,
+            }));
           }
         } catch (error) {
           console.error('Error fetching address:', error);
@@ -125,11 +132,17 @@ export default function Home() {
 
   const handleSelectSuggestion = (suggestion: Suggestion) => {
     setAddress(suggestion.title);
-    setSelectedLocation({
+    const location = {
       address: suggestion.address,
       latitude: suggestion.latitude,
       longitude: suggestion.longitude,
-    });
+    };
+    setSelectedLocation(location);
+    localStorage.setItem('userLocation', JSON.stringify({
+      lat: location.latitude,
+      lon: location.longitude,
+      address: location.address,
+    }));
     setSuggestions([]);
     setShowSuggestions(false);
   };
@@ -140,7 +153,12 @@ export default function Home() {
       return;
     }
 
-    console.log('Searching for food at:', selectedLocation);
+    const params = new URLSearchParams({
+      lat: selectedLocation.latitude.toString(),
+      lon: selectedLocation.longitude.toString(),
+      address: selectedLocation.address,
+    });
+    router.push(`/search?${params.toString()}`);
   };
 
   return (

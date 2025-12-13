@@ -1,11 +1,13 @@
 /** @type {import('next').NextConfig} */
+const isProd = process.env.NODE_ENV === 'production';
+
 const nextConfig = {
-  output: 'export',
+  ...(isProd && { output: 'export' }),
   images: { unoptimized: true },
-  basePath: process.env.NODE_ENV === 'production' ? '/foodflow' : '',
-  assetPrefix: process.env.NODE_ENV === 'production' ? '/foodflow' : '',
+  basePath: isProd ? '/foodflow' : '',
+  assetPrefix: isProd ? '/foodflow' : '',
   env: {
-    NEXT_PUBLIC_BASE_PATH: process.env.NODE_ENV === 'production' ? '/foodflow' : '',
+    NEXT_PUBLIC_BASE_PATH: isProd ? '/foodflow' : '',
   },
 };
 

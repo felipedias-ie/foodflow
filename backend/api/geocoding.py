@@ -99,8 +99,8 @@ def autocomplete_address(query: str, at: str = "40.42024,-3.68755") -> Optional[
     }
 
     params = {
-        'xnlp': 'CL_JSMv3.1.69.0',
-        'apikey': 'oH_o12KpRFWZwHNiHd3nJXt-rP4vahlFcxxgb0sPW6w',
+        'xnlp': 'CL_JSMv3.2.0.0',
+        'apikey': 't8O_G9BE_xgA_oPNGdUOXmxdRrQjbCqOr7YsXIywQsU',
         'at': at,
         'lang': 'en-GB',
         'limit': '5',

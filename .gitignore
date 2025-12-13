@@ -25,3 +25,5 @@ test/**
 
 design/
 brief.md
+.azurite/
+todo.md
