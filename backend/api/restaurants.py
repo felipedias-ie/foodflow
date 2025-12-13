@@ -32,10 +32,16 @@ def is_local() -> bool:
     return "127.0.0.1" in conn_str or "localhost" in conn_str
 
 
+def get_api_base_url() -> str:
+    if is_local():
+        return "http://localhost:7071/api"
+    return os.environ.get("API_BASE_URL", "https://foodflow-v2.azurewebsites.net/api")
+
+
 def get_image_url(image_type: str, filename: str) -> str:
     if is_local():
         return f"http://127.0.0.1:10000/devstoreaccount1/{BLOB_CONTAINER_IMAGES}/{image_type}/{filename}"
-    return f"/api/images/{image_type}/{filename}"
+    return f"{get_api_base_url()}/images/{image_type}/{filename}"
 
 
 def get_banner_url(restaurant_id: str) -> str:
