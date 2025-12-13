@@ -190,7 +190,7 @@ function SearchContent() {
             {restaurants.map((restaurant) => (
               <Link
                 key={restaurant.id}
-                href={`/restaurant/${restaurant.id}?lat=${userLocation?.lat}&lon=${userLocation?.lon}`}
+                href={`/restaurant?id=${restaurant.id}&lat=${userLocation?.lat}&lon=${userLocation?.lon}`}
                 className="group cursor-pointer"
               >
                 <div className="relative w-full">

@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState, Suspense } from 'react';
-import { useParams, useSearchParams } from 'next/navigation';
+import { useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 
 interface Restaurant {
@@ -49,8 +49,8 @@ interface MenuData {
 }
 
 function RestaurantContent() {
-  const params = useParams();
   const searchParams = useSearchParams();
+  const restaurantId = searchParams.get('id');
   const [restaurant, setRestaurant] = useState<Restaurant | null>(null);
   const [menuCategories, setMenuCategories] = useState<MenuCategory[]>([]);
   const [menuInfo, setMenuInfo] = useState<{ phone?: string; description?: string }>({});
@@ -62,15 +62,17 @@ function RestaurantContent() {
   const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:7071/api';
 
   useEffect(() => {
-    if (params.id) {
+    if (restaurantId) {
       fetchRestaurantDetails();
+    } else {
+      setLoading(false);
     }
-  }, [params.id]);
+  }, [restaurantId]);
 
   const fetchRestaurantDetails = async () => {
     setLoading(true);
     try {
-      const response = await fetch(`${API_BASE}/restaurants/${params.id}`);
+      const response = await fetch(`${API_BASE}/restaurants/${restaurantId}`);
       const data = await response.json();
 
       if (data.success) {
@@ -110,7 +112,7 @@ function RestaurantContent() {
 
   const fetchMenu = async () => {
     try {
-      const response = await fetch(`${API_BASE}/restaurants/${params.id}/menu`);
+      const response = await fetch(`${API_BASE}/restaurants/${restaurantId}/menu`);
       const data = await response.json();
       
       if (data.success && data.data) {
@@ -168,7 +170,7 @@ function RestaurantContent() {
     );
   }
 
-  if (!restaurant) {
+  if (!restaurantId || !restaurant) {
     return (
       <div className="min-h-screen bg-[#f8fbfa] flex flex-col items-center justify-center gap-4">
         <p className="text-xl text-gray-600">Restaurant not found</p>
