@@ -809,8 +809,16 @@ export default function RegisterMealPage() {
                                 )}
                             </p>
                         </div>
-                        <div className="text-xs font-mono text-gray-400 bg-gray-100 px-2 py-1 rounded">
-                            ID: {selectedRestaurant.id}
+                        <div className="flex items-center gap-2">
+                            <Link
+                                href={`/orders?restaurant_id=${encodeURIComponent(selectedRestaurant.id)}`}
+                                className="h-9 px-4 inline-flex items-center justify-center rounded-full bg-[#38e07b] text-gray-900 font-bold text-xs hover:opacity-90"
+                            >
+                                View Orders
+                            </Link>
+                            <div className="text-xs font-mono text-gray-400 bg-gray-100 px-2 py-1 rounded">
+                                ID: {selectedRestaurant.id}
+                            </div>
                         </div>
                     </div>
 
