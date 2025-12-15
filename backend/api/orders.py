@@ -92,6 +92,38 @@ def _basket_key(basket_id: str, restaurant_id: str) -> Dict[str, str]:
         "RowKey"      : restaurant_id
     }
 
+def _escape_odata_value(val: str) -> str:
+    return (val or "").replace("'", "''")
+
+def _entity_to_order(ent: Any) -> Dict[str, Any]:
+    order_id = ent.get("RowKey")
+    try:
+        items = json.loads(ent.get("items_json") or "[]")
+    except Exception:
+        items = []
+
+    return {
+        "id"           : order_id,
+        "status"       : ent.get("status"),
+        "created_at"   : ent.get("created_at"),
+        "updated_at"   : ent.get("updated_at"),
+        "basket_id"    : ent.get("basket_id"),
+        "restaurant_id": ent.get("restaurant_id"),
+        "restaurant"   : {"lat": ent.get("restaurant_lat"), "lon": ent.get("restaurant_lon")},
+        "delivery"     : {"lat": ent.get("delivery_lat"), "lon": ent.get("delivery_lon"), "address": ent.get("delivery_address")},
+        "items"        : items,
+        "subtotal"     : ent.get("subtotal"),
+        "delivery_fee" : ent.get("delivery_fee"),
+        "total"        : ent.get("total"),
+        "route"        : {
+            "distance"        : ent.get("route_distance_text"),
+            "duration"        : ent.get("route_duration_text"),
+            "duration_seconds": ent.get("route_duration_seconds"),
+            "polyline"        : ent.get("route_polyline"),
+            "eta_updated_at"  : ent.get("eta_updated_at"),
+        },
+    }
+
 def register_routes(app: "FunctionApp"):
     
     @app.route(route="baskets/{basket_id}", methods=["GET", "PUT"])
@@ -134,9 +166,38 @@ def register_routes(app: "FunctionApp"):
         except Exception as e:
             return error_response(f"Internal server error: {str(e)}", 500)
     
-    @app.route(route="orders", methods=["POST"])
-    def create_order(req: func.HttpRequest) -> func.HttpResponse:
+    @app.route(route="orders", methods=["GET", "POST"])
+    def orders(req: func.HttpRequest) -> func.HttpResponse:
         try:
+            if req.method == "GET":
+                basket_id     = (req.params.get("basket_id") or "").strip()
+                restaurant_id = (req.params.get("restaurant_id") or "").strip()
+                try:
+                    limit = int(req.params.get("limit", "50"))
+                except Exception:
+                    limit = 50
+                limit = max(1, min(limit, 200))
+
+                if not basket_id and not restaurant_id:
+                    return error_response("Provide basket_id or restaurant_id", 400)
+
+                filters = ["PartitionKey eq 'order'"]
+                if basket_id:
+                    filters.append(f"basket_id eq '{_escape_odata_value(basket_id)}'")
+                if restaurant_id:
+                    filters.append(f"restaurant_id eq '{_escape_odata_value(restaurant_id)}'")
+                filter_str = " and ".join(filters)
+
+                client = get_table_client(TABLE_ORDERS)
+                try:
+                    entities = list(client.query_entities(filter_str))
+                except Exception:
+                    entities = []
+
+                orders_out = [_entity_to_order(ent) for ent in entities]
+                orders_out.sort(key=lambda o: (o.get("created_at") or ""), reverse=True)
+                return success_response(orders_out[:limit])
+
             payload   = req.get_json()
             basket_id = (payload.get("basket_id") or "").strip()
             if not basket_id:
@@ -265,37 +326,7 @@ def register_routes(app: "FunctionApp"):
             except Exception:
                 return error_response("Order not found", 404)
 
-            items = json.loads(ent.get("items_json") or "[]")
-            return success_response(
-                {
-                    "id"         : order_id,
-                    "status"     : ent.get("status"),
-                    "created_at" : ent.get("created_at"),
-                    "updated_at" : ent.get("updated_at"),
-                    "basket_id"  : ent.get("basket_id"),
-                    "restaurant_id": ent.get("restaurant_id"),
-                    "restaurant" : {
-                        "lat": ent.get("restaurant_lat"),
-                        "lon": ent.get("restaurant_lon")
-                    },
-                    "delivery"   : {
-                        "lat"    : ent.get("delivery_lat"),
-                        "lon"    : ent.get("delivery_lon"),
-                        "address": ent.get("delivery_address"),
-                    },
-                    "items"      : items,
-                    "subtotal"   : ent.get("subtotal"),
-                    "delivery_fee": ent.get("delivery_fee"),
-                    "total"      : ent.get("total"),
-                    "route"      : {
-                        "distance"        : ent.get("route_distance_text"),
-                        "duration"        : ent.get("route_duration_text"),
-                        "duration_seconds": ent.get("route_duration_seconds"),
-                        "polyline"        : ent.get("route_polyline"),
-                        "eta_updated_at"  : ent.get("eta_updated_at"),
-                    },
-                }
-            )
+            return success_response(_entity_to_order(ent))
         except Exception as e:
             return error_response(f"Internal server error: {str(e)}", 500)
     
